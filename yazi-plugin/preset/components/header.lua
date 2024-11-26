@@ -48,9 +48,9 @@ function Header:flags()
 	if filter then
 		t[#t + 1] = string.format("filter: %s", filter)
 	end
-	if finder then
-		t[#t + 1] = string.format("find: %s", finder)
-	end
+	-- if finder then
+	-- 	t[#t + 1] = string.format("find: %s", finder)
+	-- end
 	return #t == 0 and "" or "(" .. table.concat(t, ", ") .. ")"
 end
 
