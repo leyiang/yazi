@@ -14,17 +14,11 @@ pub(super) struct Opt {
 	pub(super) query: Option<String>,
 	pub(super) prev:  bool,
 	pub(super) case:  FilterCase,
-	pub(super) clear:  bool,
 }
 
 impl From<Cmd> for Opt {
 	fn from(mut c: Cmd) -> Self {
-		Self {
-			query: c.take_first_str(),
-			prev: c.bool("previous"),
-			clear: c.bool("clear"),
-			case: FilterCase::from(&c),
-		}
+		Self { query: c.take_first_str(), prev: c.bool("previous"), case: FilterCase::from(&c) }
 	}
 }
 
@@ -32,15 +26,8 @@ impl Tab {
 	#[yazi_codegen::command]
 	pub fn find(&mut self, opt: Opt) {
 		tokio::spawn(async move {
-			if opt.clear {
-				emit!(Call(
-					Cmd::args("find_do", &[""]),
-					Layer::Manager
-				));
-				return;
-			}
-
 			let rx = InputProxy::show(InputCfg::find(opt.prev));
+
 			let rx = Debounce::new(UnboundedReceiverStream::new(rx), Duration::from_millis(50));
 			pin!(rx);
 
