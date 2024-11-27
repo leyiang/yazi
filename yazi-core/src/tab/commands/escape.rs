@@ -98,28 +98,33 @@ impl Tab {
 
 		render_and!(b)
 	}
-
-	pub fn try_escape_visual(&mut self) -> bool {
-		let select = self.mode.is_select();
+	
+	pub fn append_selected(&mut self, append: bool) -> bool {
 		let Some((_, indices)) = self.mode.take_visual() else {
 			return true;
 		};
-
-		render!();
 		let urls: Vec<_> =
 			indices.into_iter().filter_map(|i| self.current.files.get(i)).map(|f| &f.url).collect();
 
 		let same = !self.cwd().is_search();
-		if !select {
+
+		if append {
+			if self.selected.add_many(&urls, same) != urls.len() {
+				AppProxy::notify_warn(
+					"Escape visual mode",
+					"Some files cannot be selected, due to path nesting conflict.",
+				);
+				return false;
+			}
+		} else {
 			self.selected.remove_many(&urls, same);
-		} else if self.selected.add_many(&urls, same) != urls.len() {
-			AppProxy::notify_warn(
-				"Escape visual mode",
-				"Some files cannot be selected, due to path nesting conflict.",
-			);
-			return false;
 		}
 
 		true
+	}
+
+	pub fn try_escape_visual(&mut self) -> bool {
+		render!();
+		return self.append_selected(false);
 	}
 }

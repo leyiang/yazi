@@ -20,7 +20,17 @@ impl Tab {
 		if opt.unset {
 			self.mode = Mode::Unset(idx, BTreeSet::from([idx]));
 		} else {
-			self.mode = Mode::Select(idx, BTreeSet::from([idx]));
+			let is_any_file_selected = match self.mode {
+				Mode::Select(_, ref selected_indices) => !selected_indices.is_empty(),
+				_ => false,
+			};
+
+			if is_any_file_selected {
+				self.append_selected( true );
+				self.mode = Mode::Normal;
+			} else {
+				self.mode = Mode::Select(idx, BTreeSet::from([idx]));
+			}
 		};
 		render!();
 	}
