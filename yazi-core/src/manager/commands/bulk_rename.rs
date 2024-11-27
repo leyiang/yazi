@@ -64,13 +64,13 @@ impl Manager {
 			for (o, n) in &todo {
 				writeln!(stderr, "{} -> {}", o.display(), n.display())?;
 			}
-			write!(stderr, "Continue to rename? (y/N): ")?;
+			write!(stderr, "Continue to rename? (Y/n): ")?;
 			stderr.flush()?;
 		}
 
 		let mut buf = [0; 10];
 		_ = stdin().read(&mut buf).await?;
-		if buf[0] != b'y' && buf[0] != b'Y' {
+		if buf[0] == b'n' && buf[0] == b'N' {
 			return Ok(());
 		}
 
